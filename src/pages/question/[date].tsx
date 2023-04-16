@@ -6,18 +6,23 @@ import { appRouter } from "src/libs/server/trpc";
 import { getYear } from "date-fns";
 import Layout from "src/components/Layout";
 import {
+  Box,
   Button,
+  Heading,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Spinner,
   Text,
   Textarea,
   useBoolean,
+  useToast,
 } from "@chakra-ui/react";
 import SSRSafeSuspense from "src/components/SSRSafeSuspense";
+import { useState } from "react";
 
 const PrevModal = ({ questionId }: { questionId: string }) => {
   const [prevModalOpen, { on, off }] = useBoolean(false);
@@ -30,23 +35,33 @@ const PrevModal = ({ questionId }: { questionId: string }) => {
   return (
     <>
       <Button size="xs" onClick={on}>
-        이전 응답 보기
+        과거의 답변들 보기
       </Button>
 
       <Modal isOpen={prevModalOpen} onClose={off}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Modal Title</ModalHeader>
+          <ModalHeader>
+            <h2>과거의 답변들</h2>
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <ol>
+            <Box as="ol" listStyleType="none">
               {prevAnswers.map((answer) => (
-                <li key={answer.id}>
-                  <h3>{answer.year}</h3>
-                  <p>{answer.description}</p>
-                </li>
+                <Box
+                  as="li"
+                  key={answer.id}
+                  borderTop="1px solid"
+                  borderTopColor="gray.400"
+                  py="4"
+                >
+                  <Heading as="h3" fontSize="sm" mb="2">
+                    {answer.year}
+                  </Heading>
+                  <Text>{answer.description}</Text>
+                </Box>
               ))}
-            </ol>
+            </Box>
           </ModalBody>
         </ModalContent>
       </Modal>
@@ -63,11 +78,25 @@ const AnswerForm = ({
   date: string;
   questionId: string;
 }) => {
-  const [submitted] = trpc.answers.hasSubmitted.useSuspenseQuery({
+  const [submitted, { refetch }] = trpc.answers.hasSubmitted.useSuspenseQuery({
     date,
     year,
   });
-  const { mutate } = trpc.answers.create.useMutation();
+  const toast = useToast();
+
+  const { mutate } = trpc.answers.create.useMutation({
+    onSuccess: () => {
+      refetch();
+      toast({
+        title: "등록완료",
+        description: "답변이 등록되었어요.",
+        status: "success",
+        isClosable: true,
+      });
+    },
+  });
+
+  const [answer, setAnswer] = useState("");
 
   return (
     <form
@@ -75,7 +104,7 @@ const AnswerForm = ({
         e.preventDefault();
         mutate({
           questionId,
-          answer: "MOCK",
+          answer,
           year,
         });
       }}
@@ -85,6 +114,8 @@ const AnswerForm = ({
         bg="gray.600"
         color="whiteAlpha.800"
         name="answer"
+        onChange={(e) => setAnswer(e.target.value)}
+        value={answer}
         placeholder={
           submitted ? "이미 등록한 답변입니다." : "답변을 입력해주세요."
         }
@@ -124,7 +155,7 @@ const QuestionPage = ({ date }: { date: string }) => {
       <Text color="whiteAlpha.900" fontSize="xl" marginBottom="4">
         Q. {description}
       </Text>
-      <SSRSafeSuspense fallback={null}>
+      <SSRSafeSuspense fallback={<Spinner />}>
         <AnswerForm date={date} year={thisYear} questionId={id} />
       </SSRSafeSuspense>
     </Layout>
