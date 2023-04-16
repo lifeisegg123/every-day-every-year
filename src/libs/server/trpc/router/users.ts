@@ -2,8 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { router, procedure } from "../trpc";
 
 export const usersRouter = router({
-  me: procedure.query(async ({ ctx, input }) => {
-    console.log("why context not work", ctx.session);
+  me: procedure.query(async ({ ctx }) => {
     if (!ctx.session) {
       throw new TRPCError({
         code: "UNAUTHORIZED",

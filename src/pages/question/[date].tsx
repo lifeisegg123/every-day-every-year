@@ -4,20 +4,51 @@ import { trpc } from "src/libs/client/trpc";
 import { prisma } from "src/libs/server/prisma";
 import { appRouter } from "src/libs/server/trpc";
 import { getYear } from "date-fns";
+import Layout from "src/components/Layout";
+import { getToday } from "src/utils/date";
+import {
+  Button,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Text,
+  Textarea,
+  useBoolean,
+} from "@chakra-ui/react";
+import SSRSafeSuspense from "src/components/SSRSafeSuspense";
 
 const PrevModal = ({ questionId }: { questionId: string }) => {
+  const [prevModalOpen, { on, off }] = useBoolean(false);
   const [prevAnswers] = trpc.answers.getByQuestion.useSuspenseQuery({
     questionId,
   });
   return (
-    <ol>
-      {prevAnswers.map((answer) => (
-        <li key={answer.id}>
-          <h3>{answer.year}</h3>
-          <p>{answer.description}</p>
-        </li>
-      ))}
-    </ol>
+    <>
+      <Button size="xs" onClick={on}>
+        이전 응답 보기
+      </Button>
+
+      <Modal isOpen={prevModalOpen} onClose={off}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Modal Title</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <ol>
+              {prevAnswers.map((answer) => (
+                <li key={answer.id}>
+                  <h3>{answer.year}</h3>
+                  <p>{answer.description}</p>
+                </li>
+              ))}
+            </ol>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
   );
 };
 
@@ -29,10 +60,26 @@ const QuestionPage = ({ date }: { date: string }) => {
   const { mutate } = trpc.answers.create.useMutation();
 
   const thisYear = getYear(new Date()).toString();
+  const today = getToday();
 
   return (
-    <div>
-      <button>이전 응답 보기</button>
+    <Layout
+      header={
+        <Layout.Header
+          description={`${thisYear}-${today}일의 질문에 답하기`}
+          rightNode={
+            <SSRSafeSuspense fallback={null}>
+              <PrevModal questionId={id} />
+            </SSRSafeSuspense>
+          }
+        >
+          매일 매년
+        </Layout.Header>
+      }
+    >
+      <Text color="whiteAlpha.900" fontSize="xl" marginBottom="4">
+        Q. {description}
+      </Text>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -43,14 +90,15 @@ const QuestionPage = ({ date }: { date: string }) => {
           });
         }}
       >
-        <div>{description}</div>
-        <div>
-          <textarea name="answer"></textarea>
-        </div>
-        <button>등록하기</button>
+        <Textarea
+          resize="none"
+          bg="gray.600"
+          color="whiteAlpha.800"
+          name="answer"
+        />
+        <Button mt="4">등록하기</Button>
       </form>
-      {/* <PrevModal questionId={id} /> */}
-    </div>
+    </Layout>
   );
 };
 
