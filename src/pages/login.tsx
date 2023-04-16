@@ -14,8 +14,8 @@ const login = () => {
         gap="4"
       >
         <Layout.Header description="로그인하기">매일 매년</Layout.Header>
-        <Button bg="yellow.400" size="lg" onClick={() => signIn("kakao")}>
-          카카오톡으로 로그인
+        <Button size="lg" onClick={() => signIn("google")}>
+          구글계정으로 로그인
         </Button>
       </Flex>
     </Layout>
