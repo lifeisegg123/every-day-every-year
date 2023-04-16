@@ -163,6 +163,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
         date,
       },
     })),
-    fallback: false,
+    fallback: "blocking",
   };
 };
