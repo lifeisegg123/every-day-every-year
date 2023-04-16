@@ -17,7 +17,7 @@ function App({ Component, pageProps: { session, ...restProps } }: AppProps) {
   return (
     <SessionProvider session={session}>
       <ChakraProvider theme={gloablStyles}>
-        <Component {...restProps} />;
+        <Component {...restProps} />
       </ChakraProvider>
     </SessionProvider>
   );

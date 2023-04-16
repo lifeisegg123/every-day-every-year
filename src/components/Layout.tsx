@@ -8,11 +8,9 @@ interface LayoutProps {
 
 const Layout = ({ children, header }: LayoutProps) => {
   return (
-    <Box bg="gray.900" minH="">
-      <Box maxW="2xl" w="full" mx="auto" p="4">
-        {header}
-        <main>{children}</main>
-      </Box>
+    <Box maxW="2xl" w="full" mx="auto" p="4">
+      {header}
+      <main>{children}</main>
     </Box>
   );
 };

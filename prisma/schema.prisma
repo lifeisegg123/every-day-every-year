@@ -40,8 +40,10 @@ model Session {
 }
 
 model User {
-  id       String    @id @default(cuid())
-  nickname String?
+  id            String    @id @default(cuid())
+  nickname      String?
+  emailVerified DateTime? @map("email_verified")
+
   accounts Account[]
   sessions Session[]
   Answer   Answer[]
