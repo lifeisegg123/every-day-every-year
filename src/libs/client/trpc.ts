@@ -22,7 +22,6 @@ export const trpc = createTRPCNext<
   "ExperimentalSuspense"
 >({
   config({ ctx }) {
-    console.log(ctx?.req?.headers, "configgggs");
     return {
       links: [
         httpBatchLink({
