@@ -84,7 +84,7 @@ const AnswerForm = ({
   });
   const toast = useToast();
 
-  const { mutate } = trpc.answers.create.useMutation({
+  const { mutate, isLoading } = trpc.answers.create.useMutation({
     onSuccess: () => {
       refetch();
       toast({
@@ -122,7 +122,7 @@ const AnswerForm = ({
         disabled={submitted}
       />
       {!submitted && (
-        <Button type="submit" mt="4" disabled={submitted}>
+        <Button type="submit" mt="4" disabled={submitted || isLoading}>
           등록하기
         </Button>
       )}
